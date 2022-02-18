@@ -97,5 +97,7 @@ Function Log-ScheduledScript () {
         {$EventTimeType -eq 'days' -and $TimeDiff.TotalDays -gt $EventFrequencyInterval} {Write-EventLog -LogName $EventLogName -Source $EventSourceName -EventId $EventIDError -EntryType Error -Message "$LogMessage day(s)."}
     
         }
+    
     }
-    }
+    
+}
