@@ -15,7 +15,7 @@ Name of group managed service account
 Name of scheduled task
 
 .EXAMPLE 
-Set-ScheduledscriptAccount -gMSAname 'gmsa-server01' -Taskname 'My scheudled task'
+Set-ScheduledscriptGmsaAccount -gMSAname 'gmsa-server01' -Taskname 'My scheudled task'
 
 .FUNCTIONALITY
     Change account to Group Managed Service Account for scheduled task
@@ -54,5 +54,3 @@ Try {Set-ScheduledTask $TaskName -Principal $Principal -ErrorAction Stop}
 Catch {Write-Warning $($_.Exception.Message);Break}
 
 }
-
-Set-ScheduledscriptGmsaAccount -gMSAname 'gmsa-server01' -Taskname 'My Scheduled Task'
