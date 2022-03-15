@@ -47,7 +47,7 @@ Get-ScheduledTask -TaskName $TaskName -ErrorAction Stop
 Catch {Write-Warning $($_.Exception.Message);Break}
 
 # Change user account to gMSA for scheduled task
-$Principal = New-ScheduledTaskPrincipal -UserID "$env:USERDNSDOMAIN\$gMSAname" -LogonType Password
+$Principal = New-ScheduledTaskPrincipal -UserID "$env:USERDNSDOMAIN\$gMSAname" -LogonType Password -RunLevel Highest
 Try {Set-ScheduledTask $TaskName -Principal $Principal -ErrorAction Stop}
 Catch {Write-Warning $($_.Exception.Message);Break}
 
