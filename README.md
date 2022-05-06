@@ -1,2 +1,2 @@
-# Powershell
-Various PowerShell functions and scripts where i publish all my public scripts. Please feel free to contribute.
+# PowerShell Repository
+Welcome to my repository where i publish all my public functions and scripts. Please feel free to contribute.
