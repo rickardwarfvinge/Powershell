@@ -50,7 +50,7 @@ $HostNames = $DnsRecords | where {($_.RecordData).IPV4Address -eq $Address}
     {
  
      # Store the Record with the newest TimeStamp
-     $NewestRecord = ($HostNames.TimeStamp).ToShortDateString() | Sort-Object | Select-Object -Last 1
+     $NewestRecord = ($Hostnames.TimeStamp) | Foreach-Object {([DateTime]$_).ToString("s")} | Sort-Object | Select-Object -Last 1
      
          # Loop HostName variable
          Foreach ($Record in $HostNames | Sort-Object TimeStamp -Descending)
@@ -58,7 +58,7 @@ $HostNames = $DnsRecords | where {($_.RecordData).IPV4Address -eq $Address}
          {
             
             # If the Records TimeStamp not equals to $NewestRecord TimeStamp then we can remove it.
-            If (($Record.TimeStamp).ToShortDateString() -eq $NewestRecord)
+            If (([DateTime]($Record.TimeStamp)).ToString("s") -eq $NewestRecord)
             
             {
             
