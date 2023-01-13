@@ -1,0 +1,71 @@
+# Rickard Warfvinge 2018-01-23
+# All code snippets in here needs to be wrapped in a function. Paste the function in this file and
+# then add the function name to the $text variable below here.
+# Powershell Profile Function Library. Filename: Microsoft.PowerShellISE_profile.ps1
+# Put this file in your $Profile directory  (create it if it is missing)
+# This will make the script available to all powershellISE sessions for this user.
+
+# Lists available commands. Just type 'List-cmd' to display the menu
+Function List-Cmd
+{
+write-host "`nAvailable commands" -ForegroundColor green
+ $text=@{
+ "* List-Cmd" = "Show list of commands." 
+ "* Get-RandomPassword" = "Simple password generator supporting custom length, custom charset and writing to clipboard."
+ "* Get-GPOsDisabled" = "Search for GPOs that are disabled"
+
+ }
+    
+$column1 = @{expression="Name"; width=20; `
+label="Command"; alignment="left"}
+$column2 = @{expression="Value"; width=200; `
+label="Description"; alignment="Left"}
+$text.GetEnumerator() | sort-object Name | format-table $column1, $column2 -Wrap}
+
+
+# PUT YOUR FUNCTIONS BELOW...
+
+# Function that creates a random password with specific characters and numbers to chose from
+# and lets the user choose how many positions the password should have.
+# Rickard Warfvinge 2020-01-20
+Function Get-RandomPassword () {
+    [cmdletbinding()]
+    Param(
+          [Parameter(ValueFromPipeline=$True,
+          HelpMessage="Enter the length of your randomized password.")]
+          [ValidateNotNullOrEmpty()]
+          [int]$Length
+          )
+
+
+If ($Length -eq $null -or $Length -eq ""){$Length = Read-host "Input the desired length of your randomized password"}
+$PasswordSet = 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','x','y','z','0','1','2','3','4','5','6','7','8','9','0',`
+'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','X','Y','Z','!','#','$','-','_','?','/','&','.',',','!','#','$','-','_','?','/','&','.',','`
+,'0','1','2','3','4','5','6','7','8','9','0'
+Foreach ($i in 1..$Length) {$Password += Get-Random -InputObject $PasswordSet}
+cls;"`n";write-host "Password: $Password ($Length characters)";"`n"
+}
+
+###########################################################################################################################
+
+# List GPOs that are disabled
+Function Get-GPOsDisabled ()
+{ 
+    Foreach ($GPO in (Get-GPO -All))
+   
+    {
+        If ($GPO.GpoStatus -eq 'AllSettingsDisabled')
+        
+        {
+            [PSCustomObject]@{
+            GpoName = $GPO.DisplayName
+            GpoCreationDate = $GPO.CreationTime
+            }
+        }           
+    } 
+}
+
+###########################################################################################################################
+
+# Run menu
+list-cmd
