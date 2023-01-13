@@ -1,20 +1,35 @@
-# Rickard Warfvinge 2018-01-23
-# All code snippets in here needs to be wrapped in a function. Paste the function in this file and
-# then add the function name to the $text variable below here.
-# Powershell Profile Function Library. Filename: Microsoft.PowerShellISE_profile.ps1
-# Put this file in your $Profile directory  (create it if it is missing)
-# This will make the script available to all powershellISE sessions for this user.
+<#
+    
+    .SYNOPSIS
+    Powershell profile example with pre loading functions in you Powershell environment
+    
+    .DESCRIPTION
+    Powershell profile example with pre loading functions in you Powershell environment. Two simple functions included
+    
+    .DETAILED DESCRIPTION
+    All code snippets in here needs to be wrapped in a function. Paste the function in this file and then add the function name to
+    the $text variable below. Powershell Profile Function Library. Filename: Microsoft.PowerShellISE_profile.ps1
+    Put this file in your $Profile directory  (create it if it is missing). This will make the script available to all powershellISE sessions for this user.
+    
+    .FUNCTIONALITY
+        Auto load PS functions from you profile with menu options
+    
+    .NOTES
+        Author:  Rickard Warfvinge <rickard.warfvinge@gmail.com>
+        Purpose: Powershell profile example with pre loading functions in you Powershell environment
+    #>
 
 # Lists available commands. Just type 'List-cmd' to display the menu
 Function List-Cmd
 {
-write-host "`nAvailable commands" -ForegroundColor green
+ 
+ write-host "`nAvailable commands" -ForegroundColor green
  $text=@{
  "* List-Cmd" = "Show list of commands." 
  "* Get-RandomPassword" = "Simple password generator supporting custom length, custom charset and writing to clipboard."
  "* Get-GPOsDisabled" = "Search for GPOs that are disabled"
 
- }
+}
     
 $column1 = @{expression="Name"; width=20; `
 label="Command"; alignment="left"}
