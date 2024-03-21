@@ -60,7 +60,7 @@ If ((Get-ADOptionalFeature -filter {Name -like "Privileged*"} | select -ExpandPr
 
     {
 
-    $PolicyMaxDays = 5 # Maximal time for temporary group membership according to ACDI policy (5 days). Ok to change this value if new policy guidelines in the future
+    $PolicyMaxDays = 5 # Maximal time for temporary group membership.
     
     Switch ($TimeType) # Define what TimeType that is selected and control that $PolicyMaxDays is not is exceeded
     
