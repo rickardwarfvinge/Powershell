@@ -1,6 +1,6 @@
-Function Log-ScheduledScript () {
+Function Trace-ScheduledScript () {
 
-    <#
+<#
     
     .SYNOPSIS
     Monitor recurring scheduled powershell scripts used in windows task scheduler
@@ -27,7 +27,7 @@ Function Log-ScheduledScript () {
     Time interval for recurring script. Options: 1-60 days/hours/minutes/seconds
     
     .EXAMPLE 
-    Log-ScheduledScript -EventLogName 'Powershell Script Log' -EventSourceName Scripts -EventIDInfo 100 -EventIDError 101 -EventTimeType minutes -EventFrequencyInterval 5
+    Trace-ScheduledScript -EventLogName 'Powershell Script Log' -EventSourceName Scripts -EventIDInfo 100 -EventIDError 101 -EventTimeType minutes -EventFrequencyInterval 5
     
     .FUNCTIONALITY
         Recurring scheduled scripts via Windows task scheduler
@@ -37,34 +37,35 @@ Function Log-ScheduledScript () {
         Purpose: Function to use in Powershell scripts scheduled via windows task scheduler. Information eventlog entry is written when script starts
                  and next time it runs it verifys that the time frequency interval havent been exceded. If interval is exceded error is written
                  and can be used in any monitoring tool. The script must be run with administrator privileges
-    #>
+#>
         
-        [CmdletBinding()]
-        Param(
-            [Parameter(Mandatory=$true)]
-            [string] $EventLogName,
-            [Parameter(Mandatory=$true)]
-            [string] $EventSourceName,
-            [Parameter(Mandatory=$true)]
-            [int] $EventIDInfo,
-            [Parameter(Mandatory=$true)]
-            [int] $EventIDError,
-            [Parameter(Mandatory=$true)]
-            [ValidateSet('days','hours','minutes','seconds')]
-            [string] $EventTimeType,
-            [Parameter(Mandatory=$true)]
-            [ValidateRange(1,60)]
-            [int] $EventFrequencyInterval
-            
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$true)]
+        [string] $EventLogName,
+        [Parameter(Mandatory=$true)]
+        [string] $EventSourceName,
+        [Parameter(Mandatory=$true)]
+        [int] $EventIDInfo,
+        [Parameter(Mandatory=$true)]
+        [int] $EventIDError,
+        [Parameter(Mandatory=$true)]
+        [ValidateSet('days','hours','minutes','seconds')]
+        [string] $EventTimeType,
+        [Parameter(Mandatory=$true)]
+        [ValidateRange(1,60)]
+        [int] $EventFrequencyInterval
         )
     
     # Name of script
     $ScriptName = $myInvocation.ScriptName | Split-Path -Leaf
     
     # Create eventlog and source if it not exists
-    If (-Not([System.Diagnostics.EventLog]::Exists($EventLogName) -and [System.Diagnostics.EventLog]::SourceExists($EventSourceName))) 
-                
-    {New-EventLog -LogName $EventLogName -Source $EventSourceName}
+    If (-Not([System.Diagnostics.EventLog]::Exists($EventLogName) -and [System.Diagnostics.EventLog]::SourceExists($EventSourceName))) {
+    
+        New-EventLog -LogName $EventLogName -Source $EventSourceName
+        
+    }
     
     # Write eventlog when script starts
     Write-EventLog -LogName $EventLogName -Source $EventSourceName -EventId $EventIDInfo -EntryType Information -Message "Powershell script '$ScriptName' started"
@@ -76,9 +77,7 @@ Function Log-ScheduledScript () {
     $NextToLastEvent = Get-EventLog -LogName $EventLogName -Source $EventSourceName | Where-Object {$_.Message -eq "Powershell script '$ScriptName' started"} | Select-Object -Skip 1 | Select-Object -First 1
     
     # Null only occurs the first time the script is executed because there are no events in the log with this script name
-    If (-Not($NextToLastEvent -eq $null)) 
-    
-    {
+    If (-Not($NextToLastEvent -eq $null)) {
         
         # Log message
         $LogMessage = "Powershell script '$ScriptName' haven't been executed in the last $EventFrequencyInterval"
@@ -87,14 +86,31 @@ Function Log-ScheduledScript () {
         $TimeDiff = (Get-Date ($LastEvent.TimeGenerated)) - (Get-Date ($NextToLastEvent.TimeGenerated))
        
         # If the time difference is greater then the value you set in $EventFrequencyInterval variable an error log event will be written
-        Switch ($EventTimeType)
+        Switch ($EventTimeType) {
     
-        {
-    
-        {$EventTimeType -eq 'seconds' -and $TimeDiff.TotalSeconds -gt $EventFrequencyInterval} {Write-EventLog -LogName $EventLogName -Source $EventSourceName -EventId $EventIDError -EntryType Error -Message "$LogMessage second(s)."}
-        {$EventTimeType -eq 'minutes' -and $TimeDiff.TotalMinutes -gt $EventFrequencyInterval} {Write-EventLog -LogName $EventLogName -Source $EventSourceName -EventId $EventIDError -EntryType Error -Message "$LogMessage minute(s)."}
-        {$EventTimeType -eq 'hours' -and $TimeDiff.TotalHours -gt $EventFrequencyInterval} {Write-EventLog -LogName $EventLogName -Source $EventSourceName -EventId $EventIDError -EntryType Error -Message "$LogMessage hour(s)."}
-        {$EventTimeType -eq 'days' -and $TimeDiff.TotalDays -gt $EventFrequencyInterval} {Write-EventLog -LogName $EventLogName -Source $EventSourceName -EventId $EventIDError -EntryType Error -Message "$LogMessage day(s)."}
+            {$EventTimeType -eq 'seconds' -and $TimeDiff.TotalSeconds -gt $EventFrequencyInterval} {
+            
+                Write-EventLog -LogName $EventLogName -Source $EventSourceName -EventId $EventIDError -EntryType Error -Message "$LogMessage second(s)."
+                
+            }
+            
+            {$EventTimeType -eq 'minutes' -and $TimeDiff.TotalMinutes -gt $EventFrequencyInterval} {
+            
+                Write-EventLog -LogName $EventLogName -Source $EventSourceName -EventId $EventIDError -EntryType Error -Message "$LogMessage minute(s)."
+                
+            }
+            
+            {$EventTimeType -eq 'hours' -and $TimeDiff.TotalHours -gt $EventFrequencyInterval} {
+            
+                Write-EventLog -LogName $EventLogName -Source $EventSourceName -EventId $EventIDError -EntryType Error -Message "$LogMessage hour(s)."
+                
+            }
+            
+            {$EventTimeType -eq 'days' -and $TimeDiff.TotalDays -gt $EventFrequencyInterval} {
+            
+                Write-EventLog -LogName $EventLogName -Source $EventSourceName -EventId $EventIDError -EntryType Error -Message "$LogMessage day(s)."
+                
+            }
     
         }
     
