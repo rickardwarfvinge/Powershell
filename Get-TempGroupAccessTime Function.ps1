@@ -25,44 +25,46 @@ Function Get-TempGroupAccessTime () {
     .NOTES
         Author:  Rickard Warfvinge <rickard.warfvinge@gmail.com>
         Purpose: Get remaining temporary access time for a group using Privileged Access Management Feature of Active Directory
-    #>
-
-
+#>
 
     [CmdletBinding()]
-        Param(
-            [Parameter(Mandatory=$true)]
-            [ValidateScript({Get-ADUser -Identity $_})]
-            [string] $UserName,
-            [Parameter(Mandatory=$true)]
-            [ValidateScript({Get-AdGroup -Identity $_})]
-            [string] $Group
+    Param(
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({Get-ADUser -Identity $_})]
+        [string] $UserName,
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({Get-AdGroup -Identity $_})]
+        [string] $Group
 
         )
     
-# Verify if Privileged Access Management Feature is enabled in the domain
-If ((Get-ADOptionalFeature -filter {Name -like "Privileged*"} | select -ExpandProperty IsDisableable) -eq $false)
+    # Verify if Privileged Access Management Feature is enabled in the domain
+    If ((Get-ADOptionalFeature -filter {Name -like "Privileged*"} | select -ExpandProperty IsDisableable) -eq $false) {
+    
+        $UserName = Get-ADUser $UserName | select -ExpandProperty Name # Create AD Object
+        $Group = Get-ADGroup $Group | select -ExpandProperty Name # Create AD Object
 
-    {
+            If (Get-ADGroupMember $Group | where {$_.Name -eq $UserName}) {
 
-    $UserName = Get-ADUser $UserName | select -ExpandProperty Name # Create AD Object
-    $Group = Get-ADGroup $Group | select -ExpandProperty Name # Create AD Object
+                $TimeLeft = Get-ADGroup $Group -Property member -ShowMemberTimeToLive | select -ExpandProperty member
+                $TimeLeft = ($TimeLeft -split ',')[0] -replace '[^\d]+'
+                $TimeSpan = New-TimeSpan -Seconds $TimeLeft
+                Write-Host "User: $UserName have temporary access to AD-Group: $Group for $TimeSpan"
 
-        If (Get-ADGroupMember $Group | where {$_.Name -eq $UserName})
+            }
 
-        {
-
-        $TimeLeft = Get-ADGroup $Group -Property member -ShowMemberTimeToLive | select -ExpandProperty member
-        $TimeLeft = ($TimeLeft -split ',')[0] -replace '[^\d]+'
-        $TimeSpan = New-TimeSpan -Seconds $TimeLeft
-        Write-Host "User: $UserName have temporary access to AD-Group: $Group for $TimeSpan"
-
-        }
-
-        Else {Write-Host "User: $UserName is not a member of AD-Group: $Group"}
+            Else {
+        
+                Write-Host "User: $UserName is not a member of AD-Group: $Group"
+            
+            }
 
     }
 
-Else {Write-Warning "PAM feature is not enabled in domain: $env:USERDNSDOMAIN"}
+    Else {
+
+        Write-Warning "PAM feature is not enabled in domain: $env:USERDNSDOMAIN"
+    
+    }
 
 }
