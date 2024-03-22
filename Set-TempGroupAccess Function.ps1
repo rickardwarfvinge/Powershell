@@ -37,87 +37,99 @@ Function Set-TempGroupAccess () {
     .NOTES
         Author:  Rickard Warfvinge <rickard.warfvinge@gmail.com>
         Purpose: Grant temporary group access to Active Directory security groups with option to limit access time to a value of your choice (PolicyMaxDays)
-    #>
+#>
 
     [CmdletBinding()]
-        Param(
-            [Parameter(Mandatory=$true)]
-            [ValidateScript({Get-ADUser -Identity $_})]
-            [string] $UserName,
-            [Parameter(Mandatory=$true)]
-            [ValidateScript({Get-AdGroup -Identity $_})]
-            [string] $Group,
-            [Parameter(Mandatory=$true)]
-            [ValidateSet('Days','Hours','Minutes','Seconds')]
-            [string] $TimeType,
-            [Parameter(Mandatory=$true)]
-            [string] $TTL
-
+    Param(
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({Get-ADUser -Identity $_})]
+        [string] $UserName,
+        [Parameter(Mandatory=$true)]
+        [ValidateScript({Get-AdGroup -Identity $_})]
+        [string] $Group,
+        [Parameter(Mandatory=$true)]
+        [ValidateSet('Days','Hours','Minutes','Seconds')]
+        [string] $TimeType,
+        [Parameter(Mandatory=$true)]
+        [string] $TTL
         )
     
-# Verify if Privileged Access Management Feature is enabled in the domain
-If ((Get-ADOptionalFeature -filter {Name -like "Privileged*"} | select -ExpandProperty IsDisableable) -eq $false)
+    # Verify if Privileged Access Management Feature is enabled in the domain
+    If ((Get-ADOptionalFeature -filter {Name -like "Privileged*"} | Select-Object -ExpandProperty IsDisableable) -eq $false) {
 
-    {
-
-    $PolicyMaxDays = 5 # Maximal time for temporary group membership.
+        $PolicyMaxDays = 5 # Maximal time for temporary group membership.
     
-    Switch ($TimeType) # Define what TimeType that is selected and control that $PolicyMaxDays is not is exceeded
-    
-        {
-    
-        {$TimeType -eq 'Seconds'}
-        
-            {
+        # Define what TimeType that is selected and control that $PolicyMaxDays is not is exceeded
+        Switch ($TimeType) {
             
-            $NewTTL = New-TimeSpan -Seconds $TTL
-            If ($NewTTL.TotalSeconds -gt ($PolicyMaxDays * 86400))
-            {Write-Error "TTL of $($NewTTL.TotalSeconds) $TimeType exceeds the maximum allowed time which is $($PolicyMaxDays * 86400) $TimeType";Return}
-            $ConsoleOutput = $NewTTL.TotalSeconds
-
-            }
-
-        {$TimeType -eq 'Minutes'}
-        
-            {
+            {$TimeType -eq 'Seconds'} {
             
-            $NewTTL = New-TimeSpan -Minutes $TTL
-            If ($NewTTL.TotalMinutes -gt ($PolicyMaxDays * 1440))
-            {Write-Error "TTL of $($NewTTL.TotalMinutes) $TimeType exceeds the maximum allowed time which is $($PolicyMaxDays * 1440) $TimeType";Return}
-            $ConsoleOutput = $NewTTL.TotalMinutes
-
-            }
-
-        {$TimeType -eq 'Hours'}
-        
-            {
+                $NewTTL = New-TimeSpan -Seconds $TTL
+                If ($NewTTL.TotalSeconds -gt ($PolicyMaxDays * 86400)) {
             
-            $NewTTL = New-TimeSpan -Hours $TTL
-            If ($NewTTL.TotalHours -gt ($PolicyMaxDays * 24))
-            {Write-Error "TTL of $($NewTTL.TotalHours) $TimeType exceeds the maximum allowed time which is $($PolicyMaxDays * 24) $TimeType";Return}
-            $ConsoleOutput = $NewTTL.TotalHours
-
-            }
-
-        {$TimeType -eq 'Days'}
-        
-            {
+                    Write-Error "TTL of $($NewTTL.TotalSeconds) $TimeType exceeds the maximum allowed time which is $($PolicyMaxDays * 86400) $TimeType"
+                    Return
             
-            $NewTTL = New-TimeSpan -Days $TTL
-            If ($NewTTL.TotalDays -gt $PolicyMaxDays)
-            {Write-Error "TTL of $($NewTTL.TotalDays) $TimeType exceeds the maximum allowed time which is $PolicyMaxDays $TimeType";Return}
-            $ConsoleOutput = $NewTTL.TotalDays
+                }
             
-            }
+                $ConsoleOutput = $NewTTL.TotalSeconds
+
+                }
+
+            {$TimeType -eq 'Minutes'} {
+            
+                $NewTTL = New-TimeSpan -Minutes $TTL
+                If ($NewTTL.TotalMinutes -gt ($PolicyMaxDays * 1440)) {
+            
+                    Write-Error "TTL of $($NewTTL.TotalMinutes) $TimeType exceeds the maximum allowed time which is $($PolicyMaxDays * 1440) $TimeType"
+                    Return
+            
+                }
+            
+                $ConsoleOutput = $NewTTL.TotalMinutes
+
+                }
+
+            {$TimeType -eq 'Hours'} {
+            
+                $NewTTL = New-TimeSpan -Hours $TTL
+                If ($NewTTL.TotalHours -gt ($PolicyMaxDays * 24)) {
+            
+                    Write-Error "TTL of $($NewTTL.TotalHours) $TimeType exceeds the maximum allowed time which is $($PolicyMaxDays * 24) $TimeType"
+                    Return
+            
+                }
+            
+                $ConsoleOutput = $NewTTL.TotalHours
+
+                }
+
+            {$TimeType -eq 'Days'} {
+            
+                $NewTTL = New-TimeSpan -Days $TTL
+                If ($NewTTL.TotalDays -gt $PolicyMaxDays) {
+            
+                    Write-Error "TTL of $($NewTTL.TotalDays) $TimeType exceeds the maximum allowed time which is $PolicyMaxDays $TimeType"
+                    Return
+            
+                }
+            
+                $ConsoleOutput = $NewTTL.TotalDays
+            
+                }
         
         }
      
-    Add-ADGroupMember -Identity $Group -Members $UserName -MemberTimeToLive $NewTTL
-    # Optional output to user. Enable if you need it
-    # Write-Host "User $UserName have temporary access to AD-Group $Group for $ConsoleOutput $TimeType"
+        Add-ADGroupMember -Identity $Group -Members $UserName -MemberTimeToLive $NewTTL
+        # Optional output to user. Enable if you need it
+        # Write-Host "User $UserName have temporary access to AD-Group $Group for $ConsoleOutput $TimeType"
     
     }
 
-Else {Write-Warning "PAM feature is not enabled in domain: $env:USERDNSDOMAIN"}
+    Else {
+
+        Write-Warning "PAM feature is not enabled in domain: $env:USERDNSDOMAIN"
+    
+    }
 
 }
