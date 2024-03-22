@@ -32,23 +32,44 @@ Set-ScheduledscriptGmsaAccount -gMSAname 'gmsa-server01' -Taskname 'My scheudled
         [Parameter(Mandatory=$true)]
         [string] $Taskname
         
-    )
+        )
 
-If (-Not($gMSAname.EndsWith('$'))) {$gMSAname = $gMSAname + '$'} # If no trailing $ character in gMSA name, add $ sign
+    # If no trailing $ character in gMSA name, add $ sign
+    If (-Not($gMSAname.EndsWith('$'))) {
 
-# Test gMSA account and get scheduled task
-Try {
+    $gMSAname = $gMSAname + '$'
 
-Test-ADServiceAccount -Identity $gMSAname -ErrorAction Stop
-Get-ScheduledTask -TaskName $TaskName -ErrorAction Stop
+    }
 
-}
+    # Test gMSA account and get scheduled task
+    Try {
 
-Catch {Write-Warning $($_.Exception.Message);Break}
+        Test-ADServiceAccount -Identity $gMSAname -ErrorAction Stop
+        Get-ScheduledTask -TaskName $TaskName -ErrorAction Stop
 
-# Change user account to gMSA for scheduled task
-$Principal = New-ScheduledTaskPrincipal -UserID "$env:USERDNSDOMAIN\$gMSAname" -LogonType Password -RunLevel Highest
-Try {Set-ScheduledTask $TaskName -Principal $Principal -ErrorAction Stop}
-Catch {Write-Warning $($_.Exception.Message);Break}
+    }
+
+    Catch {
+
+        Write-Warning $($_.Exception.Message)
+        Break
+
+    }
+
+    # Change user account to gMSA for scheduled task
+    $Principal = New-ScheduledTaskPrincipal -UserID "$env:USERDNSDOMAIN\$gMSAname" -LogonType Password -RunLevel Highest
+
+    Try {
+
+        Set-ScheduledTask $TaskName -Principal $Principal -ErrorAction Stop
+
+    }
+
+    Catch {
+
+        Write-Warning $($_.Exception.Message)
+        Break
+
+    }
 
 }
