@@ -131,7 +131,6 @@ Write-Verbose "Found the following cluster nodes: $AllClusterNodes." -Verbose
 # User information
 Write-Verbose "Retreiving all virtual machines from cluster." -Verbose
 
-# Om inget cluster finns plockas alla VMar ut ändå???
 # Get all VMs from all nodes
 $AllVMs = $AllClusterNodes | ForEach-Object {Get-VM -ComputerName $_}
 
