@@ -1,3 +1,4 @@
+
 Function Get-TempGroupAccessTime () {
 
 <#
@@ -40,31 +41,22 @@ Function Get-TempGroupAccessTime () {
     
     # Verify if Privileged Access Management Feature is enabled in the domain
     If ((Get-ADOptionalFeature -filter {Name -like "Privileged*"} | select -ExpandProperty IsDisableable) -eq $false) {
-    
         $UserName = Get-ADUser $UserName | select -ExpandProperty Name # Create AD Object
         $Group = Get-ADGroup $Group | select -ExpandProperty Name # Create AD Object
 
             If (Get-ADGroupMember $Group | where {$_.Name -eq $UserName}) {
-
-                $TimeLeft = Get-ADGroup $Group -Property member -ShowMemberTimeToLive | select -ExpandProperty member
+                $TimeLeft = (Get-ADGroup $Group -Property member -ShowMemberTimeToLive).Member | where {$_ -match 'TTL'}
                 $TimeLeft = ($TimeLeft -split ',')[0] -replace '[^\d]+'
                 $TimeSpan = New-TimeSpan -Seconds $TimeLeft
                 Write-Host "User: $UserName have temporary access to AD-Group: $Group for $TimeSpan"
-
             }
 
             Else {
-        
                 Write-Host "User: $UserName is not a member of AD-Group: $Group"
-            
             }
-
     }
 
     Else {
-
         Write-Warning "PAM feature is not enabled in domain: $env:USERDNSDOMAIN"
-    
     }
-
 }
