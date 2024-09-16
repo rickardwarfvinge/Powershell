@@ -4,6 +4,7 @@ Function Set-KerberosConstrainedDelegation {
 <#
     .DESCRIPTION
     Set Kerberos Constrained Delegation on User accounts, computer accounts or Group Managed Service accounts.
+    Control if account is sensetive and cannot be delegated.
     Correct ServicePrincipalName(s) needs to be set on target object(s) before, or after this function is used.
         
     .REQUIREMENTS
