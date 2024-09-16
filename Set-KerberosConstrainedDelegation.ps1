@@ -27,7 +27,7 @@ Function Set-KerberosConstrainedDelegation {
         Set-KerberosConstrainedDelegation -AccountName user01 -ServicePrincipalNames http/test.domain.com, http/test1.domain.com -Protocol 'Use Any Authentication Protocol'
     
     2. Set constrained delegation on account user01 for one service type (SPN) using 'Kerberos Only' with verbose output OFF
-        Set-KerberosConstrainedDelegation -AccountName gMSA-ScriptTest -ServicePrincipalNames http\test.adlab.shb.biz -Protocol 'Kerberos Only' -VerboseOutput OFF
+        Set-KerberosConstrainedDelegation -AccountName gMSA-Account01 -ServicePrincipalNames http/test1.domain.com -Protocol 'Kerberos Only' -VerboseOutput OFF
     
     .AUTHOR
     Rickard Warfvinge, rickard.warfvinge@gmail.com
