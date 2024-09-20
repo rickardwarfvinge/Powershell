@@ -1,15 +1,23 @@
-
 Function Set-KerberosConstrainedDelegation {
 
 <#
+    .SYNOPSIS
+    Set Kerberos Constrained Delegation
+
     .DESCRIPTION
     Set Kerberos Constrained Delegation on User accounts, computer accounts or Group Managed Service accounts.
-    Control if account is sensetive and cannot be delegated.
     Correct ServicePrincipalName(s) needs to be set on target object(s) before, or after this function is used.
-        
-    .REQUIREMENTS
-    PS Module: ActiveDirectory
-    
+
+    .EXAMPLE
+    PS> Set-KerberosConstrainedDelegation -AccountName user01 -ServicePrincipalNames http/test.domain.com, http/test1.domain.com -Protocol 'Use Any Authentication Protocol'
+
+    Set constrained delegation on account user01 for two service types (SPNs) using 'Any Authentication Protocol' with verbose output (default: ON)
+
+    .EXAMPLE
+    PS> Set-KerberosConstrainedDelegation -AccountName gMSA-ScriptTest -ServicePrincipalNames http/test1.domain.com -Protocol 'Kerberos Only' -VerboseOutput OFF
+
+    Set constrained delegation on account user01 for one service type (SPN) using 'Kerberos Only' with verbose output OFF
+
     .PARAMETER AccountName
     AccountName of user, computer or group manage service accounts
     
@@ -22,15 +30,9 @@ Function Set-KerberosConstrainedDelegation {
     .PARAMETER VerboseOutput
     Verbose console output, ON or OFF (Default: ON)
     
-    .EXAMPLE 
-    1. Set constrained delegation on account user01 for two service types (SPNs) using 'Any Authentication Protocol' with verbose output (default: ON)
-        Set-KerberosConstrainedDelegation -AccountName user01 -ServicePrincipalNames http/test.domain.com, http/test1.domain.com -Protocol 'Use Any Authentication Protocol'
-    
-    2. Set constrained delegation on account user01 for one service type (SPN) using 'Kerberos Only' with verbose output OFF
-        Set-KerberosConstrainedDelegation -AccountName gMSA-Account01 -ServicePrincipalNames http/test1.domain.com -Protocol 'Kerberos Only' -VerboseOutput OFF
-    
-    .AUTHOR
-    Rickard Warfvinge, rickard.warfvinge@gmail.com
+    .NOTES
+        Requirements: Powershell Module: ActiveDirectory
+        Author: Rickard Warfvinge
 #>
 
 [CmdletBinding()]
