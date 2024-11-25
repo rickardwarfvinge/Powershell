@@ -5,9 +5,6 @@
     .DESCRIPTION
     Various Group Policy functions
     
-    .EXAMPLE 
-    Get-GPOsDisabled, Get-GPOsWithoutLinks, Get-GPOsNotApplied, Get-GPOsNoAuthGroup
-    
     .FUNCTIONALITY
         List Group Policy related information
     
@@ -36,6 +33,51 @@ Function Get-GPOsWithoutLinks {
             GpoName = $GPO.DisplayName
             GpoCreationDate = $GPO.CreationTime
             }
+        }
+    }
+}
+
+# List GPOs and there links (OU Path)
+Function Get-GPOsWithLinks { 
+    Foreach ($GPO in (Get-GPO -All)) {
+        $GPOReport = $GPO | Get-GPOReport -ReportType XML
+        $XmlDoc = [xml]$GPOReport
+        
+        $LinkedOUs = $XmlDoc.GPO.LinksTo | ForEach-Object {
+            $_.SOMPath
+        }
+        
+        If ($LinkedOUs -and $LinkedOUs.Count -gt 0) {
+            [PSCustomObject]@{
+                GpoName         = $GPO.DisplayName
+                GpoCreationDate = $GPO.CreationTime
+                LinkedOUs       = $LinkedOUs -join "; "
+            }
+        }
+    }
+}
+
+# List GPOs and there links (OU Path) and also include GPOs without any links
+Function Get-GPOsWithLinksAndWithout { 
+    foreach ($GPO in (Get-GPO -All)) {
+        # Retrieve the XML report for the GPO
+        $GPOReport = $GPO | Get-GPOReport -ReportType XML
+        $XmlDoc = [xml]$GPOReport
+        
+        # Parse the XML to extract linked OUs
+        $LinkedOUs = $XmlDoc.GPO.LinksTo | ForEach-Object {
+            $_.SOMPath
+        }
+        
+        # Output GPO details, whether it has links or not
+        [PSCustomObject]@{
+            GpoName         = $GPO.DisplayName
+            GpoCreationDate = $GPO.CreationTime
+            LinkedOUs       = if ($LinkedOUs -and $LinkedOUs.Count -gt 0) { 
+                                 $LinkedOUs -join "; " 
+                               } else { 
+                                 "No Link" 
+                               }
         }
     }
 }
