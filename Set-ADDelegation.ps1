@@ -1,134 +1,134 @@
 Function Set-ADDelegation () {
 
-    <#
-        .SYNOPSIS
-        Delegate control for identities in Active Directory with predefined delegation packets.
+<#
+    .SYNOPSIS
+    Delegate control for identities in Active Directory with predefined delegation packets.
     
-        .DESCRIPTION
-        Delegate control for user, group or computer. Choose between predefined delegation packages. Optional console output (ON/OFF, default: ON)
-        Name convention check for groups (override possible, default: ON).
-        Helper functions used:
+    .DESCRIPTION
+    Delegate control for user, group or computer. Choose between predefined delegation packages. Optional console output (ON/OFF, default: ON)
+    Name convention check for groups (override possible, default: ON).
+    Helper functions used:
 
-        New-ADDGuidMap: Function to create and return a hashtable of Active Directory attribute names to their corresponding schema GUIDs
-        New-ADDExtendedRightMap: Function to create and return a hashtable of Active Directory extended rights to their corresponding GUIDs.
-        Show-ADACLUpdateSummary: Function to display console information after updating an Active Directory ACL
+    New-ADDGuidMap: Function to create and return a hashtable of Active Directory attribute names to their corresponding schema GUIDs
+    New-ADDExtendedRightMap: Function to create and return a hashtable of Active Directory extended rights to their corresponding GUIDs.
+    Show-ADACLUpdateSummary: Function to display console information after updating an Active Directory ACL
         
-        Detailed description of delegation packets:
+    Detailed description of delegation packets:
         
-        Delegation 'ComputerDomainJoin'
-            Type: Allow
-            Access: Reset password, Validated write to DNS host name, Validated write to service principal name, Read/Write account restrictions
-            Applies to: Descendants Computer Objects
+    Delegation 'ComputerDomainJoin'
+        Type: Allow
+        Access: Reset password, Validated write to DNS host name, Validated write to service principal name, Read/Write account restrictions
+        Applies to: Descendants Computer Objects
         
-        Delegation 'ComputerCreateDelete'
-            Type: Allow
-            Access: Create/delete computer objects
-            Applies to: This object and all descendants Objects
+    Delegation 'ComputerCreateDelete'
+        Type: Allow
+        Access: Create/delete computer objects
+        Applies to: This object and all descendants Objects
 
-        Delegation 'ComputerCreate'
-            Type: Allow
-            Access: Create computer objects
-            Applies to: This object and all descendants Objects
+    Delegation 'ComputerCreate'
+        Type: Allow
+        Access: Create computer objects
+        Applies to: This object and all descendants Objects
 
-        Delegation 'ComputerDelete'
-            Type: Allow
-            Access: Delete computer objects
-            Applies to: This object and all descendants Objects
+    Delegation 'ComputerDelete'
+        Type: Allow
+        Access: Delete computer objects
+        Applies to: This object and all descendants Objects
             
-        Delegation 'ComputerDisable'
-            Type: Allow
-            Access: Disable computer objects
-            Applies to: This object and all descendants Objects
+    Delegation 'ComputerDisable'
+        Type: Allow
+        Access: Disable computer objects
+        Applies to: This object and all descendants Objects
 
-        Delegation 'ComputerReadWrite'
-            Type: Allow
-            Access: Read/Write computer objects
-            Applies to: Descendants Computer Objects
+    Delegation 'ComputerReadWrite'
+        Type: Allow
+        Access: Read/Write computer objects
+        Applies to: Descendants Computer Objects
 
-        Delegation 'GPOLink'
-            Type: Allow
-            Access: Read/Write gPLink and gPOptions
-            Applies to: This object and all descendants Objects
+    Delegation 'GPOLink'
+        Type: Allow
+        Access: Read/Write gPLink and gPOptions
+        Applies to: This object and all descendants Objects
         
-        Delegation 'GPOGenerateRSOP'
-            Type: Allow
-            Access: Generate resultant set of policy (planning/logging)
-            Applies to: This object and all descendants Objects
+    Delegation 'GPOGenerateRSOP'
+        Type: Allow
+        Access: Generate resultant set of policy (planning/logging)
+        Applies to: This object and all descendants Objects
 
-        Delegation 'GroupCreateDelete'
-            Type: Allow
-            Access: Create/delete Group Objects
-            Applies to: Descendants Group Objects
+    Delegation 'GroupCreateDelete'
+        Type: Allow
+        Access: Create/delete Group Objects
+        Applies to: Descendants Group Objects
 
-        Delegation 'GroupCreate'
-            Type: Allow
-            Access: Create Group Objects
-            Applies to: Descendants Group Objects
+    Delegation 'GroupCreate'
+        Type: Allow
+        Access: Create Group Objects
+        Applies to: Descendants Group Objects
 
-        Delegation 'GroupDelete'
-            Type: Allow
-            Access: Delete Group Objects
-            Applies to: Descendants Group Objects
+    Delegation 'GroupDelete'
+        Type: Allow
+        Access: Delete Group Objects
+        Applies to: Descendants Group Objects
 
-        Delegation 'GroupWriteMember'
-            Type: Allow
-            Access: Read/Write Group Members
-            Applies to: Descendants Group Objects
+    Delegation 'GroupWriteMember'
+        Type: Allow
+        Access: Read/Write Group Members
+        Applies to: Descendants Group Objects
 
-        Delegation 'GroupWriteExtAttr1'
-            Type: Allow
-            Access: Read/Write extensionAttribute1
-            Applies to: Descendants Group Objects
+    Delegation 'GroupWriteExtAttr1'
+        Type: Allow
+        Access: Read/Write extensionAttribute1
+        Applies to: Descendants Group Objects
 
-        Delegation 'GroupWriteExtAttr7'
-            Type: Allow
-            Access: Read/Write extensionAttribute7
-            Applies to: Descendants Group Objects
+    Delegation 'GroupWriteExtAttr7'
+        Type: Allow
+        Access: Read/Write extensionAttribute7
+        Applies to: Descendants Group Objects
 
-        .EXAMPLE 
-        PS> Set-ADDelegation -IdentityToDelegateTo ADGroup01 -OuDistinguishedName "OU=computers,OU=test,DC=domain,DC=com" -DelegationPackage 'GPOGenerateRSOP'
+    .EXAMPLE 
+    PS> Set-ADDelegation -IdentityToDelegateTo ADGroup01 -OuDistinguishedName "OU=computers,OU=test,DC=domain,DC=com" -DelegationPackage 'GPOGenerateRSOP'
         
-        This example creates a Group Policy RSOP (Planning/Logging) delegation for identity 'ADGroup01' on OU: 'OU=computers,OU=test,DC=domain,DC=com' with console output
+    This example creates a Group Policy RSOP (Planning/Logging) delegation for identity 'ADGroup01' on OU: 'OU=computers,OU=test,DC=domain,DC=com' with console output
 
-        .EXAMPLE 
-        PS> Set-ADDelegation -IdentityToDelegateTo ADGroup01 -OuDistinguishedName "OU=computers,OU=test,DC=domain,DC=com" -DelegationPackage 'GroupDelete' -ConsoleOutput OFF
+    .EXAMPLE 
+    PS> Set-ADDelegation -IdentityToDelegateTo ADGroup01 -OuDistinguishedName "OU=computers,OU=test,DC=domain,DC=com" -DelegationPackage 'GroupDelete' -ConsoleOutput OFF
         
-        This example creates delete delegation of group objects for identity 'ADGroup01' on OU: 'OU=computers,OU=test,DC=domain,DC=com' without console output
+    This example creates delete delegation of group objects for identity 'ADGroup01' on OU: 'OU=computers,OU=test,DC=domain,DC=com' without console output
 
-        .EXAMPLE 
-        PS> Set-ADDelegation -IdentityToDelegateTo ADGroup01 -OuDistinguishedName "OU=computers,OU=test,DC=domain,DC=com" -DelegationPackage 'GroupWriteExtAttr1' -OverrideNamingConvention ON
+    .EXAMPLE 
+    PS> Set-ADDelegation -IdentityToDelegateTo ADGroup01 -OuDistinguishedName "OU=computers,OU=test,DC=domain,DC=com" -DelegationPackage 'GroupWriteExtAttr1' -OverrideNamingConvention ON
         
-        This example creates read/write delegation of extensionAttribute1 for identity 'ADGroup01' on OU: 'OU=computers,OU=test,DC=domain,DC=com' with override enabled for group naming check
+    This example creates read/write delegation of extensionAttribute1 for identity 'ADGroup01' on OU: 'OU=computers,OU=test,DC=domain,DC=com' with override enabled for group naming check
         
-        Console output with ACL update summary (optional)
+    Console output with ACL update summary (optional)
         
-        .PARAMETER IdentityToDelegateTo
-        Active Directory identity to delegate to. Allowed object types: User,Group or Computer
+    .PARAMETER IdentityToDelegateTo
+    Active Directory identity to delegate to. Allowed object types: User,Group or Computer
     
-        .PARAMETER OuDistinguishedName
-        DistinguishedName of OrganizationalUnit where the delegation will take place
+    .PARAMETER OuDistinguishedName
+    DistinguishedName of OrganizationalUnit where the delegation will take place
         
-        .PARAMETER DelegationPackage
-        Name of the predefined delegation packet
+    .PARAMETER DelegationPackage
+    Name of the predefined delegation packet
 
-        .PARAMETER OverrideNamingConvention
-        Disable group naming convention check, ON or OFF (Default: OFF)
+    .PARAMETER OverrideNamingConvention
+    Disable group naming convention check, ON or OFF (Default: OFF)
         
-        .PARAMETER ConsoleOutput
-        Console output, ON or OFF (Default: ON)
+    .PARAMETER ConsoleOutput
+    Console output, ON or OFF (Default: ON)
     
-        .NOTES
-            Requirements:
-                Powershell Module: ActiveDirectory
+    .NOTES
+        Requirements:
+            Powershell Module: ActiveDirectory
             
-            Future Improvements:
-                Add logic when an ACL is reused (Eg. ComputerDelete is already set and ComputerCreateDelete is added and the same ACL is only updated) causing
-                the functions console output to display a warning that no ACL is applied even tough it is applied.
-                The logic behind the console output should be dynamically in the ACL BLOCK. Some parts are, but not all.
+        Future Improvements:
+            Add logic when an ACL is reused (Eg. ComputerDelete is already set and ComputerCreateDelete is added and the same ACL is only updated) causing
+            the functions console output to display a warning that no ACL is applied even tough it is applied.
+            The logic behind the console output should be dynamically in the ACL BLOCK. Some parts are, but not all.
                 
-            Author: Rickard Warfvinge
+        Author: Rickard Warfvinge
     #>
-    
+
     [CmdletBinding()]
         Param(
             [Parameter(Position = 0, Mandatory = $true,
@@ -180,7 +180,7 @@ Function Set-ADDelegation () {
             [Parameter(Position = 3, Mandatory=$false,
             HelpMessage = "Disable group naming convention check")]
             [ValidateSet('ON','OFF')]    
-            [String]$OverrideNamingConvention = 'OFF',
+            [String]$OverrideNamingConvention = 'ON',
 
             [Parameter(Position = 4, Mandatory=$false,
             HelpMessage = "Turn console output ON, or OFF")]
@@ -248,7 +248,7 @@ $GuidMap = New-ADDGuidMap
 $ExtendedRight = New-ADDExtendedRightMap
 $ADObject = Get-ADObject -Filter "Name -eq '$IdentityToDelegateTo'"
 
-If ($OverrideNamingConvention -eq 'OFF') {
+If ($OverrideNamingConvention -eq 'ON') {
     # Verify correct naming convention
     If ($ADObject.ObjectClass -eq 'Group') {
         If (-Not($IdentityToDelegateTo -like "*$DelegationPackage")) {
