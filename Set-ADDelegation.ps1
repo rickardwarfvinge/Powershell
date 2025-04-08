@@ -96,7 +96,7 @@ Function Set-ADDelegation () {
     This example creates delete delegation of group objects for identity 'ADGroup01' on OU: 'OU=computers,OU=test,DC=domain,DC=com' without console output
 
     .EXAMPLE 
-    PS> Set-ADDelegation -IdentityToDelegateTo ADGroup01 -OuDistinguishedName "OU=computers,OU=test,DC=domain,DC=com" -DelegationPackage 'GroupWriteExtAttr1' -OverrideNamingConvention ON
+    PS> Set-ADDelegation -IdentityToDelegateTo ADGroup01 -OuDistinguishedName "OU=computers,OU=test,DC=domain,DC=com" -DelegationPackage 'GroupWriteExtAttr1' -NamingConventionCheck ON
         
     This example creates read/write delegation of extensionAttribute1 for identity 'ADGroup01' on OU: 'OU=computers,OU=test,DC=domain,DC=com' with override enabled for group naming check
         
@@ -111,8 +111,8 @@ Function Set-ADDelegation () {
     .PARAMETER DelegationPackage
     Name of the predefined delegation packet
 
-    .PARAMETER OverrideNamingConvention
-    Disable group naming convention check, ON or OFF (Default: OFF)
+    .PARAMETER NamingConventionCheck
+    Naming convention check for group objects, ON or OFF (Default: ON)
         
     .PARAMETER ConsoleOutput
     Console output, ON or OFF (Default: ON)
@@ -180,7 +180,7 @@ Function Set-ADDelegation () {
             [Parameter(Position = 3, Mandatory=$false,
             HelpMessage = "Disable group naming convention check")]
             [ValidateSet('ON','OFF')]    
-            [String]$OverrideNamingConvention = 'ON',
+            [String]$NamingConventionCheck = 'ON',
 
             [Parameter(Position = 4, Mandatory=$false,
             HelpMessage = "Turn console output ON, or OFF")]
@@ -248,7 +248,7 @@ $GuidMap = New-ADDGuidMap
 $ExtendedRight = New-ADDExtendedRightMap
 $ADObject = Get-ADObject -Filter "Name -eq '$IdentityToDelegateTo'"
 
-If ($OverrideNamingConvention -eq 'ON') {
+If ($NamingConventionCheck -eq 'ON') {
     # Verify correct naming convention
     If ($ADObject.ObjectClass -eq 'Group') {
         If (-Not($IdentityToDelegateTo -like "*$DelegationPackage")) {
