@@ -49,6 +49,9 @@ Param(
     [String]$ConsoleOutput = 'ON'
 )
 
+If (-Not(Test-Path AD:)) {
+    Throw "PS Drive 'AD' is not accessible"
+}
 $ACL = Get-Acl -Path "AD:$OuDistinguishedName"
 $ACEs = $ACL.Access | Where-Object {$_.IdentityReference -eq "NT AUTHORITY\Authenticated Users" -and $_.IsInherited -eq $false}
     
