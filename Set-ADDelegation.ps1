@@ -108,7 +108,7 @@
         [Parameter(Position = 3, Mandatory=$false,
         HelpMessage = "Disable group naming convention check")]
         [ValidateSet('ON','OFF')]
-        [String]$NamingConventionCheck = 'ON',
+        [String]$NamingConventionCheck = 'OFF',
 
         [Parameter(Position = 4, Mandatory=$false,
         HelpMessage = "Turn console output ON, or OFF")]
