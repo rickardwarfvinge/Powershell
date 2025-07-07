@@ -1,4 +1,4 @@
-﻿Function Set-ADDelegation () {
+Function Set-ADDelegation () {
 
     <#
 
@@ -6,10 +6,9 @@
     Delegate control for identities in Active Directory with predefined delegation packages.
 
     .DESCRIPTION
-    Delegate control for user, group, or computer. Choose from predefined delegation packages. Optional console output (default: ON)
-    If you want to add new DelegationPackages just add the appropriate AccessRule(s) and create a new block in the switch clause
-    Optional: Naming convention check for group identities: the AD group name must end with the same name as the delegation package
-    Example: DelegationPackage 'GroupCreate' must map to group 'GroupName-GroupCreate' (default: OFF)
+    Delegate control for user, group, or computer. Choose from predefined delegation packages. Optional console output (default: ON).
+    Naming convention check for group identities: the AD group name must end with the same name as the delegation package.
+    Example: DelegationPackage 'GroupCreate' must map to group 'GroupName-GroupCreate'. Can be overridden (default: ON).
 
     Sub functions used:
     - New-ADDGuidMap: returns a hashtable allowing both name-to-GUID and GUID-to-name lookups
@@ -26,7 +25,7 @@
     Set-ADDelegation -IdentityToDelegateTo ADGroup01 -OuDistinguishedName "OU=computers,OU=test,DC=domain,DC=com" -DelegationPackage 'GroupDelete' -ConsoleOutput OFF
 
     .EXAMPLE
-    Set-ADDelegation -IdentityToDelegateTo ADGroup01 -OuDistinguishedName "OU=computers,OU=test,DC=domain,DC=com" -DelegationPackage 'GroupWriteExtAttr1' -NamingConventionCheck ON
+    Set-ADDelegation -IdentityToDelegateTo ADGroup01 -OuDistinguishedName "OU=computers,OU=test,DC=domain,DC=com" -DelegationPackage 'GroupWriteExtAttr1' -NamingConventionCheck OFF
 
     .PARAMETER IdentityToDelegateTo
     Active Directory identity to delegate to. Allowed types: User, Group, or Computer
@@ -46,7 +45,7 @@
     .NOTES
         Requires: PowerShell ActiveDirectory module
         Author: Rickard Warfvinge
-        
+
     #>
 
 [CmdletBinding()]
@@ -101,14 +100,15 @@
             'GroupWriteExtAttr1',
             'GroupWriteExtAttr7',
             'UserWriteExtAttr6',
-            'UserWriteAltSecurityIdentities'
+            'UserWriteAltSecurityIdentities',
+            'UserWriteUserWorkstations'
             )]
         [String]$DelegationPackage,
 
         [Parameter(Position = 3, Mandatory=$false,
         HelpMessage = "Disable group naming convention check")]
         [ValidateSet('ON','OFF')]
-        [String]$NamingConventionCheck = 'OFF',
+        [String]$NamingConventionCheck = 'ON',
 
         [Parameter(Position = 4, Mandatory=$false,
         HelpMessage = "Turn console output ON, or OFF")]
@@ -544,6 +544,13 @@ Function Show-ADACLUpdateSummary {
             Invoke-ACLBlock -OuDistinguishedName $OuDistinguishedName -IdentitySID $IdentitySID -DelegationName $DelegationPackage -AclActions {
                 Param($Acl)
                 $Acl.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule $IdentitySID,"ReadProperty,WriteProperty","Allow",$GuidMap["altSecurityIdentities"],"Descendents",$GuidMap["User"]))
+                }
+        }
+
+        'UserWriteUserWorkstations' {
+            Invoke-ACLBlock -OuDistinguishedName $OuDistinguishedName -IdentitySID $IdentitySID -DelegationName $DelegationPackage -AclActions {
+                Param($Acl)
+                $Acl.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule $IdentitySID,"ReadProperty,WriteProperty","Allow",$GuidMap["UserWorkstations"],"Descendents",$GuidMap["User"]))
                 }
         }
     }
